@@ -1,0 +1,261 @@
+openapi: "3.0.0"
+info:
+  title: Apache Sling JSON Store
+  version: 0.0.1-SNAPSHOT
+  description: "Apache Sling JSON store prototype, source code on [GitHub:json-store](https://github.com/apache/sling-whiteboard/tree/master/json-store). This API allows for storing JSON schema and documents, and a command is provided to push content to read-only branches for publishing."
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    anyJSON:
+      properties:
+        - "$schema":
+            type: string
+      additionalProperties: true
+security:
+  - BasicAuth : []
+paths:
+  /content/sites/{site}/schema/{name}:
+    parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+        - in: path
+          name: name
+          schema: 
+            type: string
+          required: true
+          description: Schema name
+          example: "test/minimal"
+    post:
+      operationId: postSchema
+      summary: Store or update a JSON schema
+      requestBody:
+        description: "Schema content"
+        required: true
+        content:
+          application/json:
+            example: {
+              "$schema": "https://json-schema.org/draft/2019-09/schema",
+              "$id": "https://example.com/minimal",
+              "title": "Minimal",
+              "description": "A minimal(ish) valid schema",
+              "type": "object",
+              "properties": {
+                "$schema": {
+                  "description": "The schema reference",
+                  "type": "string"
+                },
+                "tags": {
+                  "description": "Tags that categorize the product",
+                  "type": "array"
+                }
+              },
+              "additionalProperties":false,
+              "required": [ "$schema", "tags" ]
+            }
+            schema:
+              $ref: '#/components/schemas/anyJSON'
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+    get:
+      operationId: getSchema
+      summary: Get a JSON schema
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+  /content/sites/{site}/branches/authoring/{contentType}/{path}:
+    parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+        - in: path
+          name: contentType
+          schema: 
+            type: string
+          required: true
+          description: The type of content to store or retrieve
+          example: "content"
+        - in: path
+          name: path
+          schema: 
+            type: string
+          required: true
+          description: The document path
+          example: "minimal"
+    get:
+      operationId: getDocument
+      summary: Get a JSON document from the authoring branch
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+    post:
+      operationId: postDocument
+      summary: Store or update a JSON document
+      requestBody:
+        description: "Document content"
+        required: true
+        content:
+          application/json:
+            example: {
+              "$schema":"test/minimal",
+              "tags": [ "home", "green" ]
+            }
+            schema:
+              $ref: '#/components/schemas/anyJSON'
+      parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+        - in: path
+          name: contentType
+          schema: 
+            type: string
+          required: true
+          description: The type of content to store or retrieve
+          example: "content"
+        - in: path
+          name: path
+          schema: 
+            type: string
+          required: true
+          description: The document path
+          example: "minimal"
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+  /content/sites/{site}/commands/cmd/list:
+    parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+    post:
+      operationId: listCommands
+      summary: List available commands
+      requestBody:
+        description: "Empty content"
+        required: true
+        example: {}
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/anyJSON'
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+  /content/sites/{site}/commands/{namespace}/{command}:
+    parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+        - in: path
+          name: namespace
+          schema: 
+            type: string
+          required: true
+          description: Command namespace
+          example: branch
+        - in: path
+          name: command
+          schema: 
+            type: string
+          required: true
+          description: Command name
+          example: push
+    post:
+      operationId: executeCommand
+      summary: Execute a command
+      requestBody:
+        description: "Command input"
+        required: true
+        content:
+          application/json:
+            example: {
+                "branch":"testing",
+                "path":"/content/sites/example.com/branches/authoring/content/minimal"
+            }
+            schema:
+              $ref: '#/components/schemas/anyJSON'
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}
+  /content/sites/{site}/branches/{branch}/{contentType}/{path}:
+    parameters: 
+        - in: path
+          name: site
+          schema: 
+            type: string
+          required: true
+          description: Site name
+          example: "example.com"
+        - in: path
+          name: branch
+          schema: 
+            type: string
+          required: true
+          description: The branch name
+          example: "testing"
+        - in: path
+          name: contentType
+          schema: 
+            type: string
+          required: true
+          description: The type of content to store or retrieve
+          example: "content"
+        - in: path
+          name: path
+          schema: 
+            type: string
+          required: true
+          description: The document path
+          example: "minimal"
+    get:
+      operationId: getBranchDocument
+      summary: Get a JSON document from a readonly branch
+      responses:
+        '200':
+          description: |-
+            200 response
+          content:
+            application/json: {}

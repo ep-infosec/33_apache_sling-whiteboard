@@ -1,0 +1,13 @@
+{
+  "sling:resourceType": "sling:Folder",
+  "dynamic": {
+    "sling:resourceType": "sling:Folder"
+  },
+  "sources": {
+    "test2": {
+      "sling:resourceType": "test/conf",
+      "sling:resourceSuperType": "test/static",
+      "jcr:title": "Test-2"
+    }
+  }
+}
